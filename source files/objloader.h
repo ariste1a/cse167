@@ -15,6 +15,8 @@
 #include <fstream>
 #include <cstdio>
 #include <iostream>
+#include <time.h> 
+
 #ifndef OBJLOADER_H
 #define OBJLOADER_H
 
@@ -61,14 +63,14 @@ class objloader{
 	std::vector<unsigned int> lists;	//the id for all lists (so we can delete the lists after use it)
 	std::vector<material*> materials;	//all materials
 	std::vector<texcoord*> texturecoordinate;	//all texture coorinate (UV coordinate)
-	bool ismaterial,isnormals,istexture;	//obvious
-	unsigned int loadTexture(const char* filename);	//private load texture function
+	bool ismaterial,isnormals,istexture;	//obvious	
 	void clean();	//free all of the used memory
 	
 	public:
 	objloader();	
 	~objloader();	//free the textures and lists
 	int load(const char* filename);	//the main model load function
+	unsigned int loadTexture(const char* filename); 
 };
 
 #endif
