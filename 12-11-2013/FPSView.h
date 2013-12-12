@@ -132,6 +132,15 @@ public:
 	 */
 	void print();
 
+	/**
+     * Get eye.
+	 *
+	 * @return eye
+	 */
+	Vector3Mike getEye() {
+		return mEye;
+	}
+
 private:
 	/**
 	 * Check if current location is valid on collision map.

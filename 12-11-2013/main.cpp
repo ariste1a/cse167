@@ -40,6 +40,7 @@ static bool useShaders = true;
 static Shader *shade;
 static unsigned int glslProg;
 static int glslUseToonShading;
+static int glslEye;
 
 static int useToonShading = 0;
 
@@ -158,13 +159,14 @@ void init()
 	float globalAmbient[] = { .2, .2, .2, 1.0 };
 	
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbient);
-	//glEnable(GL_LIGHT0);
-	float col[] = { .2, .2, .3, 1.0 };
+	glEnable(GL_LIGHT0);
+	float col[] = { 1, 0, 0, 1 };
+	//float col[] = { .8, .2, .8, 1.0 };
 	glLightfv(GL_LIGHT0, GL_AMBIENT_AND_DIFFUSE, col);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, col);
 
-	float col2[] = { .8, .8, .8, 1.0 };
-	float col3[] = { .8, .8, .4, 1.0 };
+	float col2[] = { .3, .3, .3, 1.0 };
+	float col3[] = { .3, .3, .1, 1.0 };
 	glLightfv(GL_LIGHT1, GL_AMBIENT, col2);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, col3); 
 	float position1[] = { .4, .5, 0, 1.0 };
@@ -195,9 +197,9 @@ void displayCallback(void)
 	}
 
 	if (useShaders) {
-		glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 10);
-		glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 5);
-		glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 2);
+		glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 2);
+		glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 1);
+		glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0);
 	}
 	else {
 		glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1);
@@ -214,21 +216,21 @@ void displayCallback(void)
 	//glMatrixMode(GL_MODELVIEW);
 	//glLoadMatrixd(camera.getMatrix().multiply(model).getPointer());
 	//glLineWidth(2.5);
-
+	glEnable(GL_COLOR_MATERIAL);
 	world->draw(camera.getMatrix().multiply(model));
-
 	glLoadIdentity();
 	glScalef(100, 100, 100);
+	float pointLight[] = { position[0], position[1], position[2] };
+	glLightfv(GL_LIGHT0, GL_POSITION, pointLight);
+	Vector3Mike eye = fpsView->getEye();
+	float eyeArray[] = { eye.get_x(), eye.get_y(), eye.get_z(), 1 };
+	glUniform4fvARB(glslEye, 1, eyeArray);
 	fpsView->lookAt();
 	glCallList(cube); 
-	float position1[] = { .4, .5, 0, 1.0 };
-	float position2[] = { 0.3, 0.6, 0, 0.0 }; // other lightsource position
-	glLightfv(GL_LIGHT0, GL_POSITION, position1);
-	glLightfv(GL_LIGHT1, GL_POSITION, position2);
 
 	glPushMatrix();
 	glTranslatef(position[0], position[1], position[2]);
-	glutSolidSphere(0.05, 30, 30);
+	glutSolidSphere(.05, 30, 30);
 	glPopMatrix();
 	/*
 	glPushMatrix();
@@ -484,7 +486,7 @@ int main(int argc, char *argv[])
 		-.6, .3, 0,
 		0, 1, 0);
 	map = new CollisionMap2D(-150, 150, -150, 150);
-	setupCollisionMap(map);
+	//setupCollisionMap(map);
 
 	glutInit(&argc, argv);      	      	      // initialize GLUT
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);   // open an OpenGL context with double buffering, RGB colors, and depth buffering
@@ -557,6 +559,7 @@ int main(int argc, char *argv[])
 
 	glslProg = shade->getPid();
 	glslUseToonShading = glGetUniformLocationARB(glslProg, "useToonShading");
+	glslEye = glGetUniformLocationARB(glslProg, "eye");
 
 	// Always check that our framebuffer is ok
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)

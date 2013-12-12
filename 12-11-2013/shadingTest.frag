@@ -13,13 +13,14 @@
 
 uniform int useToonShading;
 uniform sampler2D tex;
+uniform vec4 eye;
 
 varying vec3 normal, ptHalfVector, dirHalfVector, dirLightDir;
 
 varying vec4 position_cs;
 varying vec3 normal_cs;
 
-varying vec4 ptDiffuse, ptAmbient, dirDiffuse, dirAmbient, ecPos, modelPos;
+varying vec4 ambientGlobal, ptDiffuse, ptAmbient, dirDiffuse, dirAmbient, ecPos, modelPos;
 
 void main()
 {	
@@ -28,25 +29,26 @@ void main()
 	vec3 n, halfV, lightDir;
 	float NdotL, NdotHV;
 	vec4 color = texture2D(tex, gl_TexCoord[0].st);
+	color.xyz *= .5;
+	
+	color.xyz += ambientGlobal.xyz;
 
-	color *= .65;
-
-	float att, dist;
+	float att, dist, edge;
 
 	n = normalize(normal);
 
 	// Point light calculations
 	lightDir = vec3((gl_ModelViewMatrix * gl_LightSource[0].position) - ecPos);
-
+	
 	dist = length(lightDir);
-
+	
 	NdotL = max(dot(n, normalize(lightDir)), 0.0);
 
-	if (NdotL > 0.0) {
-		att = 1 / (gl_LightSource[0].constantAttenuation +
+	//if (NdotL > 0.0) {
+		att = 1.0 / (gl_LightSource[0].constantAttenuation +
 			gl_LightSource[0].linearAttenuation * dist +
 			gl_LightSource[0].quadraticAttenuation * dist * dist);
-
+				
 		color += att * (ptDiffuse * NdotL + ptAmbient);
 
 		halfV = normalize(ptHalfVector);
@@ -54,26 +56,26 @@ void main()
 		color += att * gl_FrontMaterial.specular * gl_LightSource[0].specular *
 				pow(NdotHV, gl_FrontMaterial.shininess);
 
-		gl_FragColor += color;
-	}
-
+		gl_FragColor.xyz += color.xyz;
+	//}
+	
 	// Directional light calculations
 	color = dirAmbient;
 
 	NdotL = max(dot(n, dirLightDir), 0.0);
 
-	if (NdotL > 0.0) {
+	//if (NdotL > 0.0) {
 		color += dirDiffuse * NdotL;
 		halfV = normalize(dirHalfVector);
 		NdotHV = max(dot(n, halfV), 0.0);
 		color += gl_FrontMaterial.specular *
 			gl_LightSource[1].specular *
 			pow(NdotHV, gl_FrontMaterial.shininess);
-	}
+	//}
 
-	gl_FragColor += color;
-
-
+	gl_FragColor.xyz += color.xyz;
+	
+	
 	// Toon shading
 	if (0.5 < useToonShading) {
 
@@ -97,25 +99,31 @@ void main()
 		for (i = 0; i < 3; ++i) {
 			if (gl_FragColor[i] > .9) {
 				gl_FragColor[i] = 1;
-			} else if (gl_FragColor[i] > .75) {
-				gl_FragColor[i] = 0.75;
-			} else if (gl_FragColor[i] > .6) {
-				gl_FragColor[i] = 0.6;
-			} else if (gl_FragColor[i] > .55) {
-				gl_FragColor[i] = 0.55;
+			//} else if (gl_FragColor[i] > .75) {
+				//gl_FragColor[i] = 0.75;
+			//} else if (gl_FragColor[i] > .6) {
+				//gl_FragColor[i] = 0.6;
+			} else if (gl_FragColor[i] > .525) {
+				gl_FragColor[i] = 0.525;
 			} else if (gl_FragColor[i] > .3) {
 				gl_FragColor[i] = 0.3;
-			} else if (gl_FragColor[i] > .15) {
-				gl_FragColor[i] = 0.15;
-			} else if (gl_FragColor[i] > .09) {
-				gl_FragColor[i] = 0.09;
-			} else if (gl_FragColor[i] > .06) {
-				gl_FragColor[i] = 0.06;
-			} else if (gl_FragColor[i] > .03) {
-				gl_FragColor[i] = 0.03;
+			//} else if (gl_FragColor[i] > .15) {
+				//gl_FragColor[i] = 0.15;
+			//} else if (gl_FragColor[i] > .09) {
+				//gl_FragColor[i] = 0.09;
+			//} else if (gl_FragColor[i] > .06) {
+				//gl_FragColor[i] = 0.06;
+			//} else if (gl_FragColor[i] > .03) {
+				//gl_FragColor[i] = 0.03;
 			} else {
 				gl_FragColor[i] = 0.0;
 			}
+		}
+		
+		vec3 eyeDir = vec3((eye) - ecPos);
+		edge = dot(normalize(n), normalize(eyeDir));
+		if (edge > -0.3 && edge < 0.3) {
+			gl_FragColor = vec4(0, 0, 0, 1);
 		}
 	}
 }

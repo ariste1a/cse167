@@ -13,13 +13,14 @@
 
 uniform int useToonShading;
 uniform sampler2D tex;
+uniform vec4 eye;
 
 varying vec3 normal, ptHalfVector, dirHalfVector, dirLightDir;
 
 varying vec4 position_cs;
 varying vec3 normal_cs;
 
-varying vec4 ptDiffuse, ptAmbient, dirDiffuse, dirAmbient, ecPos, modelPos;
+varying vec4 ambientGlobal, ptDiffuse, ptAmbient, dirDiffuse, dirAmbient, ecPos, modelPos;
 
 void main()
 {	 
@@ -55,6 +56,8 @@ void main()
 
 	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 	gl_TexCoord[0] = gl_MultiTexCoord0;
+
+	ambientGlobal = gl_LightModel.ambient * gl_FrontMaterial.ambient;
 
 	// ftransform() is a built-in function that applies all
 	// transformations (i.e., modelview and 
