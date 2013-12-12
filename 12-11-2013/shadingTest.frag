@@ -42,7 +42,7 @@ void main()
 	
 	dist = length(lightDir);
 	
-	NdotL = max(dot(n, normalize(lightDir)), 0.0);
+	NdotL = max(dot(normalize(n), normalize(lightDir)), 0.0);
 
 	//if (NdotL > 0.0) {
 		att = 1.0 / (gl_LightSource[0].constantAttenuation +
@@ -122,7 +122,7 @@ void main()
 		
 		vec3 eyeDir = vec3((eye) - ecPos);
 		edge = dot(normalize(n), normalize(eyeDir));
-		if (edge > -0.3 && edge < 0.3) {
+		if (edge > -0.25 && edge < 0.25) {
 			gl_FragColor = vec4(0, 0, 0, 1);
 		}
 	}

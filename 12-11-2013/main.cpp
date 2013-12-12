@@ -486,7 +486,7 @@ int main(int argc, char *argv[])
 		-.6, .3, 0,
 		0, 1, 0);
 	map = new CollisionMap2D(-150, 150, -150, 150);
-	//setupCollisionMap(map);
+	setupCollisionMap(map);
 
 	glutInit(&argc, argv);      	      	      // initialize GLUT
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);   // open an OpenGL context with double buffering, RGB colors, and depth buffering
